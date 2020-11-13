@@ -187,8 +187,8 @@ full_df_fr <- full_join(df_france_reco, tidy_global_fr, by= c("date", "region"))
 # date input slider shiny ---------------
 
 # "2020-01-24" min des donnes open covid fr
-
-date_in_fra <- c("2020-01-24", format(max(full_df_fr$date), "%Y-%m-%d")) 
+  # patch 13-11-2020 : max(date) = NA => max(date, na.rm=TRUE)
+date_in_fra <- c("2020-01-24", format(max(full_df_fr$date, na.rm = TRUE), "%Y-%m-%d")) 
 
 # pb de date apres la mise a jour, a date maj, 
 # ttes les data regions sont a NA le tps que les donnees remontent

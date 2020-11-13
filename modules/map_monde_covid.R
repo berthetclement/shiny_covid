@@ -4,14 +4,21 @@
 mapUI <- function(id, dates_param){
   ns <- NS(id)
   
-  fluidPage(
+  fluidPage(theme = "styles.css",
     leafletOutput(ns("id_map"), width="100%", height=600),
     
     absolutePanel(id = "controls", class = "panel panel-default",
                   top = 75, left = 55, width = 250, fixed=TRUE,
                   draggable = TRUE, height = "auto",
-
-                  span(tags$i(h6("Les données proviennent du Centre des sciences et de l'ingénierie des systèmes de l'Université Johns Hopkins (JHU CSSE) .")), style="color:#045a8d"),
+                  
+                  span(
+                    tags$i(
+                      h6(
+                        "Les données proviennent du Centre des sciences et de l'ingénierie des systèmes de l'Université Johns Hopkins (JHU CSSE) ."
+                        , 
+                        style="color:#045a8d")
+                      )),
+                  # color:#cc4c02
                   h3(textOutput(ns("case_count")), align = "right"),
                   h4(textOutput(ns("death_count")), align = "right"),
                   

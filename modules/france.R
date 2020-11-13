@@ -157,7 +157,7 @@ fraServer <- function(id, df_full, bmap_fr, in_mapgeojson, in_region_gps, fct_pa
           prettyNum(., big.mark=",") %>% 
           valueBox(
             value = tags$p(., style = "font-size: 80%;"),
-            subtitle = tags$p("D\u00e9ces", style = "font-size: 80%;"),
+            subtitle = tags$p("D\u00e9c\u00e8s", style = "font-size: 80%;"),
             icon = icon("fas fa-user-check"),
             color = "orange"
           )

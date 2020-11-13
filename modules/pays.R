@@ -9,8 +9,8 @@ paysUI <- function(id, dates_param, df){
   sidebarLayout(
     sidebarPanel(
       
-      span(tags$i(h6("Evolution comparative ou par pays du nombre de cas.")), style="color:#045a8d"),
-      span(tags$i(h6("Choix du niveau et de l'indicateur")), style="color:#045a8d"),
+      span(tags$i(h6("Evolution comparative ou par pays du nombre de cas."))), #, style="color:#045a8d"
+      span(tags$i(h6("Choix du niveau et de l'indicateur"))),
       
       pickerInput(ns("level_select"), "Niveau:",   
                   choices = c("Global", "Continent", "Pays"), 
@@ -40,10 +40,15 @@ paysUI <- function(id, dates_param, df){
     ),
     
     mainPanel(
+      # gestion messages d'erreurs shiny pour actualisation des graphs ----------------
+      tags$style(type="text/css",
+                 ".shiny-output-error { visibility: hidden; }",
+                 ".shiny-output-error:before { visibility: hidden; }"
+      ),
       tabsetPanel(
-        tabPanel("Cumuls", plotlyOutput(ns("country_plot_cumulative"))),
-        tabPanel("Nouveaux cas", plotlyOutput(ns("country_plot"))),
-        tabPanel("Cumuls (log10)", plotlyOutput(ns("country_plot_cumulative_log")))
+        tabPanel("Cumul", plotlyOutput(ns("country_plot_cumulative"))),
+        tabPanel("Bilan \u00e0 date", plotlyOutput(ns("country_plot"))),
+        tabPanel("Cumul (log10)", plotlyOutput(ns("country_plot_cumulative_log")))
       ),
       tags$br(), tags$br(),
       gt_output(outputId = ns("gt_table"))
@@ -114,20 +119,21 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
       }) 
       
       # onglet cumul
+      
       output$country_plot_cumulative <- renderPlotly({
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("cases")
-          cumul_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly(pays_reactive_pop(), num_var, "Cas", col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("deaths")
-          cumul_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("per100k")
-          cumul_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly(pays_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("deathsper100k")
-          cumul_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
         
       })
@@ -137,38 +143,39 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("new_cases")
-          cumul_new_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(pays_reactive_pop(), num_var, "Cas", col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("new_deaths")
-          cumul_new_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("newper100k")
-          cumul_new_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(pays_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("newdeathsper100k")
-          cumul_new_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
         
       })
       
-      # onglet cases log 10 
+      # onglet cases log 10
       output$country_plot_cumulative_log <- renderPlotly({
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("cases")
-          cumul_plotly_log(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(pays_reactive_pop(), num_var, "Cas", col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("deaths")
-          cumul_plotly_log(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("per100k")
-          cumul_plotly_log(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(pays_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("deathsper100k")
-          cumul_plotly_log(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
         
       })
+      
       # fin pays par defaut
       
       # gt tab pays defaut ----
@@ -267,19 +274,19 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
       
       # onglet cumul
       output$country_plot_cumulative <- renderPlotly({
-        # indicateurs
+       # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("cases")
-          cumul_plotly(global_reactive_pop(), num_var, col_pays)
+          cumul_plotly(global_reactive_pop(), num_var, "Cas",col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("deaths")
-          cumul_plotly(global_reactive_pop(), num_var, col_pays)
+          cumul_plotly(global_reactive_pop(), num_var, "D\u00e9c\u00e8s",col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("per100k")
-          cumul_plotly(global_reactive_pop(), num_var, col_pays)
+          cumul_plotly(global_reactive_pop(), num_var, "Cas pour 100k",col_pays)
         }else{ # avec population
           num_var <- sym("deathsper100k")
-          cumul_plotly(global_reactive_pop(), num_var, col_pays)
+          cumul_plotly(global_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k",col_pays)
         }
         
       })
@@ -289,16 +296,16 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("new_cases")
-          cumul_new_plotly(global_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(global_reactive_pop(), num_var, "Cas",col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("new_deaths")
-          cumul_new_plotly(global_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(global_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("newper100k")
-          cumul_new_plotly(global_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(global_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("newdeathsper100k")
-          cumul_new_plotly(global_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(global_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
         
       })
@@ -307,16 +314,16 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("cases")
-          cumul_plotly_log(global_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(global_reactive_pop(), num_var, "Cas", col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("deaths")
-          cumul_plotly_log(global_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(global_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("per100k")
-          cumul_plotly_log(global_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(global_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("deathsper100k")
-          cumul_plotly_log(global_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(global_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
         
       })
@@ -347,16 +354,16 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("cases")
-          cumul_plotly(conti_reactive_pop(), num_var, col_pays)
+          cumul_plotly(conti_reactive_pop(), num_var, "Cas",col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("deaths")
-          cumul_plotly(conti_reactive_pop(), num_var, col_pays)
+          cumul_plotly(conti_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("per100k")
-          cumul_plotly(conti_reactive_pop(), num_var, col_pays)
+          cumul_plotly(conti_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("deathsper100k")
-          cumul_plotly(conti_reactive_pop(), num_var, col_pays)
+          cumul_plotly(conti_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
         
       })
@@ -366,16 +373,16 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("new_cases")
-          cumul_new_plotly(conti_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(conti_reactive_pop(), num_var, "Cas", col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("new_deaths")
-          cumul_new_plotly(conti_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(conti_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("newper100k")
-          cumul_new_plotly(conti_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(conti_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("newdeathsper100k")
-          cumul_new_plotly(conti_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(conti_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
         
       })
@@ -385,16 +392,16 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("cases")
-          cumul_plotly_log(conti_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(conti_reactive_pop(), num_var, "Cas", col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("deaths")
-          cumul_plotly_log(conti_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(conti_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("per100k")
-          cumul_plotly_log(conti_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(conti_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("deathsper100k")
-          cumul_plotly_log(conti_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(conti_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
         
       })
@@ -447,16 +454,16 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("cases")
-          cumul_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly(pays_reactive_pop(), num_var, "Cas", col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("deaths")
-          cumul_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("per100k")
-          cumul_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly(pays_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("deathsper100k")
-          cumul_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
 
       })
@@ -466,16 +473,16 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("new_cases")
-          cumul_new_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(pays_reactive_pop(), num_var, "Cas", col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("new_deaths")
-          cumul_new_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("newper100k")
-          cumul_new_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(pays_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("newdeathsper100k")
-          cumul_new_plotly(pays_reactive_pop(), num_var, col_pays)
+          cumul_new_plotly(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
 
       })
@@ -485,16 +492,16 @@ paysServer <- function(id, dates_param, df, df_countries, df_large, col_pays){
         # indicateurs
         if(input$indicateur_select=="Cas (total)"){
           num_var <- sym("cases")
-          cumul_plotly_log(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(pays_reactive_pop(), num_var, "Cas", col_pays)
         }else if(input$indicateur_select=="Morts (total)"){
           num_var <- sym("deaths")
-          cumul_plotly_log(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s", col_pays)
         }else if(input$indicateur_select=="Cas pour 100,000"){ # avec population
           num_var <- sym("per100k")
-          cumul_plotly_log(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(pays_reactive_pop(), num_var, "Cas pour 100k", col_pays)
         }else{ # avec population
           num_var <- sym("deathsper100k")
-          cumul_plotly_log(pays_reactive_pop(), num_var, col_pays)
+          cumul_plotly_log(pays_reactive_pop(), num_var, "D\u00e9c\u00e8s pour 100k", col_pays)
         }
 
       })
