@@ -1,0 +1,50 @@
+---
+title: "a_propos"
+output: html_document
+---
+
+
+# Présentation  
+
+L'objectif est de créer une application shiny dynamique de suivi du **COVID**.
+
+L'application s'organise autour de deux sources de données :  
+- [Johns Hopkins Center for Systems Science and Engineering (CSSE)](https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series)  
+- [opencovid19-fr](https://github.com/opencovid19-fr/data)
+                                                       
+Les données [CSSE](https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series)  (cas/morts/guéris) sont utilisées pour les parties "Map monde" et "Pays". A noter que nous avons des écarts sur la France avec les chiffres diffusés en France.  
+  
+  
+En effet, il est possible de trouver une carte et des indicateurs sur le site du gouvernement français [ici](https://www.gouvernement.fr/info-coronavirus/carte-et-donnees). L'application web du gouvernement est alimentée à partir des données [opencovid19-fr](https://github.com/opencovid19-fr/data).  
+
+Les données [opencovid19-fr](https://github.com/opencovid19-fr/data) vont permettre d'avoir un zoom sur la France avec les chiffres officiel. Cependant, les données sont très incompletes concernant le nombre de cas (presque uniquement pour le global sur la France). Malgré tout, nous disposons de données sur le nombre d'hospitalisations, de réanimations par région/département.
+
+Pour compléter la partie France, les données CSSE vont être utilisées pour les DOM.
+
+## Les données
+
+L'application se met à jour automatiquement à partir des repos Github, [CSSE](https://github.com/CSSEGISandData/COVID-19) et [opencovid19-fr](https://github.com/opencovid19-fr/data/tree/master/dist).  
+
+On peut trouver quelques écarts selon les sources. Un lien utile permet de comparer différentes sources de données.  
+
+- [The Lancet](https://doi.org/10.1016/S1473-3099\(20\)30120-1)  
+
+
+## L'application
+
+L'application est organisée en 4 parties : 
+
+- Une carte monde.
+- Des analyses graphiques par pays.
+- Une carte France + DOM
+- Un export des données *CSSE* au format ***csv***.
+
+## Packages
+
+L'application Shiny est construite à partir du package "covid" disponible sur mon repos Github [ici](https://github.com/berthetclement/covid).  
+
+Installation du package sur **R/RSTUDIO** :  
+
+
+ - `devtools::install_github("berthetclement/covid")`
+
