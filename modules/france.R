@@ -215,13 +215,16 @@ fraServer <- function(id, df_full, bmap_fr, in_mapgeojson, in_region_gps, fct_pa
         var <- sym("cas_confirmes")
         df <- df_full %>% 
           filter(granularite %in% "pays")
+        
         cumulative_plot(df, input$slider_date, var, "cas confirmes", col_hospi)
       })
       
       output$new_hosp_fr <- renderPlot({
         var <- sym("nouvelles_hospitalisations")
         df <- df_full %>% 
-          filter(granularite %in% "pays")
+          filter(granularite %in% "pays") %>% 
+          filter(source_type %in% "opencovid19-fr") 
+        
         new_cases_plot(df, input$slider_date, var, "nouvelles hospitalisations", col_hospi)
       })
       

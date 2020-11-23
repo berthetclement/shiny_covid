@@ -24,6 +24,7 @@ source("modules/pays.R", encoding = "UTF-8")
 source("modules/export.R", encoding = "UTF-8")
 source("modules/apropos.R", encoding = "UTF-8")
 source("modules/france.R", encoding = "UTF-8")
+source("modules/fr_reg_dep.R", encoding = "UTF-8")
 
 
 
@@ -296,6 +297,130 @@ base_map_mayo <- leaflet(reg_geojson,
   setView(lng = set_view_mayo$longitude, lat = set_view_mayo$latitude, 9)
 
 
+# REGIONS/DEPARTEMENTS -----------------------------------------------
+# les donnees globales
+
+# couleur 
+couleur_graph = "#cc4c02"
+
+# france global --------------------------------------------------------------------
+# le cumul deces total (dece + dece ehpad doit etre strictement croissant)
+fra_a_date <- full_df_fr %>% 
+  filter(region %in% "France" & source_type %in% "ministere-sante") %>% 
+  filter(date >= as.Date(date_in_fra[1])  ) %>% 
+  mutate(
+    deces_tot = rowSums(.[,9:10], na.rm=TRUE)
+  )
+
+# correction NA, et des valeurs de cumuls
+# correction du cumul uniquement appliquee sur les deces
+for(i in seq(length(fra_a_date$date))){
+  if(i>=4){
+    # deces
+    if( fra_a_date$deces_tot[i] < mean(fra_a_date$deces_tot[i:(i-4)], na.rm=TRUE) ){
+      fra_a_date$deces_tot[i] = NA
+    }
+  }
+}
+
+# france global recalcul nouveaux cas, morts, ... ------------------------
+# pour sommer dans le tableau gt 
+# le filtre est sur source_type = ministere pour ne pas prendre de doublons
+
+df_global_fr_gt <- fra_a_date %>% select(c(1:4, cas_confirmes, deces_tot, gueris.x)) %>% 
+  drop_na()
+names(df_global_fr_gt)[grepl("cas_|deces|guer", names(df_global_fr_gt))] <- c("cases", "deaths", "recovered")
+
+# calcul des nouveaux cas, deces, gueris
+tt <- add_stats_global(df_global_fr_gt) 
+
+# donnees pour cumul date de depart tableau gt
+# le full join se fait sur full_data_fr et filtre source_type opencovid19-fr pour les nouvelles_hospitalisations, nouvelles_reanimations
+fra_global_gt <- tt %>% 
+  mutate(cas = new_cases,
+         deces = new_deaths,
+         gueris = new_recovered) %>% 
+  select(date, cas, deces, gueris) %>% 
+  left_join(full_df_fr %>% 
+              filter(granularite %in% "pays") %>% 
+              filter(source_type %in% "opencovid19-fr") %>% 
+              select(c(date, nouvelles_hospitalisations, nouvelles_reanimations)), 
+            by = "date"
+  ) 
+
+# regions ----------------------------------------------------------------------------------
+
+# data frame pays DOM 
+df_dom <- data.frame(maille_code = c("REG-01", "REG-02", "REG-03", "REG-04", "REG-06"),
+                     region = c("Guadeloupe", "Martinique", "Guyane", "La_Reunion", "Mayotte")
+)
+
+# les donnees
+df_fra_reg <- full_df_fr %>% 
+  filter(granularite %in% "region")
+
+# couleurs regions 
+
+cls = rep(c(brewer.pal(8,"Dark2"), brewer.pal(10, "Paired"), 
+            brewer.pal(12, "Set3"), brewer.pal(8,"Set2"), 
+            brewer.pal(9, "Set1"), brewer.pal(8, "Accent"),  
+            brewer.pal(9, "Pastel1"),  
+            brewer.pal(8, "Pastel2")),4)
+
+cls_names = c(as.character(unique(df_fra_reg$region)))
+
+reg_cols = cls[1:length(cls_names)]
+names(reg_cols) = cls_names
+
+# df regions pour tableau gt
+
+df_reg_new <- df_fra_reg %>% 
+  select(c(1:4, cas, morts, gueris.y)) %>% 
+  drop_na()
+
+names(df_reg_new)[grepl("cas|mor|guer", names(df_reg_new))] <- c("cases", "deaths", "recovered")
+
+# calcul des nouveaux cas, deces, gueris
+tt <- add_stats_reg(df_reg_new) 
+
+# donnees pour cumul date de depart tableau gt
+# la jointure ramene les dates et les colonnes nouvelles_hospitalisations, nouvelles_reanimations
+df_gt_reg <- tt %>% 
+  mutate(cas = new_cases,
+         deces = new_deaths,
+         gueris = new_recovered) %>% 
+  select(date, cas, deces, gueris) %>% 
+  right_join(df_fra_reg %>% 
+               select(c(date, region, nouvelles_hospitalisations, nouvelles_reanimations)), 
+             by = c("date", "region")
+  ) 
+
+# departements ------------------------------------------------------------------------------
+
+# les donnees
+df_fra_dep <- full_df_fr %>% 
+  filter(granularite %in% "departement")%>% 
+  filter(source_type %in% "sante-publique-france-data") %>% 
+  select(c(date, region, hospitalises, nouvelles_hospitalisations, reanimation, nouvelles_reanimations)) %>% 
+  right_join(full_df_fr %>% 
+               select(c(date, region, granularite)) %>% 
+               filter(granularite %in% "departement"),
+             by = c("date", "region")
+  )
+
+# couleurs departements 
+
+cls = rep(c(brewer.pal(8,"Dark2"), brewer.pal(10, "Paired"), 
+            brewer.pal(12, "Set3"), brewer.pal(8,"Set2"), 
+            brewer.pal(9, "Set1"), brewer.pal(8, "Accent"),  
+            brewer.pal(9, "Pastel1"),  
+            brewer.pal(8, "Pastel2")),4)
+
+cls_names = c(as.character(unique(df_fra_dep$region)))
+
+dep_cols = cls[1:length(cls_names)]
+names(dep_cols) = cls_names
+
 
 # ui ----
 
@@ -321,6 +446,9 @@ ui <- function(){
              tabPanel("France",
                       franceUI("id_franceui", date_in_fra)
              ), # fin France
+             tabPanel("R\u00e9gions/D\u00e9partements",
+                      regUI("id_reg", date_in_fra)
+             ), # fin regions/departements
              tabPanel("Data CSSE",
                       exportUI("id_export")
              ), # fin export
@@ -345,6 +473,10 @@ server <- function(input, output, session){
   fraServer("id_franceui", full_df_fr, base_map_fr, reg_geojson, 
             reg_gps, cv_pal_fr, hopsi_cercle_col, global_cercle_col, 
             base_map_run, base_map_guy, base_map_mar, base_map_gua, base_map_mayo)
+  
+  # Regions/Departements -----
+  regServer("id_reg", full_df_fr, fra_global_gt, df_gt_reg, 
+            couleur_graph, reg_cols, dep_cols, date_in_fra)
   
   # export ----
   exportServer("id_export", tidy_global, countries, min_max_dates[2])

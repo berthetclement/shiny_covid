@@ -17,7 +17,7 @@ Les données [CSSE](https://github.com/CSSEGISandData/COVID-19/tree/master/csse_
   
 En effet, il est possible de trouver une carte et des indicateurs sur le site du gouvernement français [ici](https://www.gouvernement.fr/info-coronavirus/carte-et-donnees). L'application web du gouvernement est alimentée à partir des données [opencovid19-fr](https://github.com/opencovid19-fr/data).  
 
-Les données [opencovid19-fr](https://github.com/opencovid19-fr/data) vont permettre d'avoir un zoom sur la France avec les chiffres officiel. Cependant, les données sont très incompletes concernant le nombre de cas (presque uniquement pour le global sur la France). Malgré tout, nous disposons de données sur le nombre d'hospitalisations, de réanimations par région/département.
+Les données [opencovid19-fr](https://github.com/opencovid19-fr/data) vont permettre d'avoir un zoom sur la France avec les chiffres officiels. Cependant, les données sont très incompletes concernant le nombre de cas/décès/guérisons (disponible presque uniquement pour le global sur la France). Malgré tout, nous disposons de données sur le nombre d'hospitalisations, de réanimations par région/département.
 
 Pour compléter la partie France, les données CSSE vont être utilisées pour les DOM.
 
@@ -32,11 +32,12 @@ On peut trouver quelques écarts selon les sources. Un lien utile permet de comp
 
 ## L'application
 
-L'application est organisée en 4 parties : 
+L'application est organisée en 5 parties : 
 
 - Une carte monde.
 - Des analyses graphiques par pays.
-- Une carte France + DOM
+- Une carte France + DOM.
+- Des analyses graphiques par région/département.
 - Un export des données *CSSE* au format ***csv***.
 
 ## Packages
@@ -47,4 +48,9 @@ Installation du package sur **R/RSTUDIO** :
 
 
  - `devtools::install_github("berthetclement/covid")`
+ 
+## Application shiny 
+
+L'application shiny est également disponible via mon repos Github [ici](https://github.com/berthetclement/shiny_covid).
+ 
 
