@@ -426,37 +426,38 @@ names(dep_cols) = cls_names
 
 ui <- function(){
   
-  #bootstrapPage(
-  navbarPage(theme = shinytheme("flatly"), collapsible = TRUE,
-             "COVID-19", id="nav",
-             header = tagList(
-               useShinydashboard(),
-               setBackgroundColor(color = c("GhostWhite"))
-             )
-             ,
-             tabPanel("Map monde",
-                      div(class="outer",
-                          tags$head(includeCSS("styles.css")),
-                          mapUI("mymap", min_max_dates)
-                      )
-             ), # fin map
-             tabPanel("Pays",
-                      paysUI("id_paysui", min_max_dates, df_large_countries)
-             ), # fin pays
-             tabPanel("France",
-                      franceUI("id_franceui", date_in_fra)
-             ), # fin France
-             tabPanel("R\u00e9gions/D\u00e9partements",
-                      regUI("id_reg", date_in_fra)
-             ), # fin regions/departements
-             tabPanel("Data CSSE",
-                      exportUI("id_export")
-             ), # fin export
-             tabPanel("A propos",
-                      aproposUI("id_apropos"))
+  bootstrapPage(
+    tags$head(includeHTML(("gtag.html"))),
+    navbarPage(theme = shinytheme("flatly"), collapsible = TRUE,
+               "COVID-19", id="nav",
+               header = tagList(
+                 useShinydashboard(),
+                 setBackgroundColor(color = c("GhostWhite"))
+                 )
+               ,
+               tabPanel("Map monde",
+                        div(class="outer",
+                            tags$head(includeCSS("styles.css")),
+                            mapUI("mymap", min_max_dates)
+                            )
+                        ), # fin map
+               tabPanel("Pays",
+                        paysUI("id_paysui", min_max_dates, df_large_countries)
+                        ), # fin pays
+               tabPanel("France",
+                        franceUI("id_franceui", date_in_fra)
+                        ), # fin France
+               tabPanel("R\u00e9gions/D\u00e9partements",
+                        regUI("id_reg", date_in_fra)
+                        ), # fin regions/departements
+               tabPanel("Data CSSE",
+                        exportUI("id_export")
+                        ), # fin export
+               tabPanel("A propos",
+                        aproposUI("id_apropos"))
+               )
   )
-  #)
-}
+  }
 
 
 # serveur ----
