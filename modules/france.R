@@ -212,9 +212,13 @@ fraServer <- function(id, df_full, bmap_fr, in_mapgeojson, in_region_gps, fct_pa
       })
       
       output$cas_plot_fr <- renderPlot({
-        var <- sym("cas_confirmes")
+       var <- sym("cas_confirmes")
         df <- df_full %>% 
-          filter(granularite %in% "pays")
+          filter(granularite %in% "pays") %>%
+        # patch correctif 23/03/2021
+        # enlever les doublons
+          filter(source_type %in% "ministere-sante") %>% 
+          filter(date >= "2020-01-24") # supprime les valeurs aberrantes dates anterieures
         
         cumulative_plot(df, input$slider_date, var, "cas confirmes", col_hospi)
       })
@@ -223,7 +227,7 @@ fraServer <- function(id, df_full, bmap_fr, in_mapgeojson, in_region_gps, fct_pa
         var <- sym("nouvelles_hospitalisations")
         df <- df_full %>% 
           filter(granularite %in% "pays") %>% 
-          filter(source_type %in% "opencovid19-fr") 
+          filter(source_type %in% "opencovid19-fr") # pour eviter un cumul par source type
         
         new_cases_plot(df, input$slider_date, var, "nouvelles hospitalisations", col_hospi)
       })

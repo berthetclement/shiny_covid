@@ -185,6 +185,88 @@ df_france_reco$date <- as.Date(df_france_reco$date)
 # full join data ------------------------------------------
 full_df_fr <- full_join(df_france_reco, tidy_global_fr, by= c("date", "region"))
 
+
+
+# patch insertion ------------
+# bug data 2021-02-19 ------------
+
+# nouvelle source de donnees 
+# RAPPEL : 
+# Source de base : https://github.com/covid19datahub/COVID19/issues/157
+# Nouvelle source a utiliser : https://www.data.gouv.fr/fr/datasets/synthese-des-indicateurs-de-suivi-de-lepidemie-covid-19/#_
+
+cible_cases_tst <- "https://www.data.gouv.fr/fr/datasets/r/f335f9ea-86e3-4ffa-9684-93c009d5e617"
+df_france_tst <- data_covid(cible_cases_tst, encoding='UTF-8')
+
+new_df_to_bind <- df_france_tst %>% 
+  filter(date > "2021-02-19") %>% 
+  select(date, conf, esms_cas,esms_dc)
+
+
+##
+# corrections des NA pour deces EHPAD ----
+##
+# correction des NA pour les cas ehpad et remplacement par la valeur precedente 
+
+# recuperation du nb de cas ehpad au 19/02/2021
+last_dc <- df_france_tst %>% 
+  filter(date %in% as.Date("2021-02-19")) %>% 
+  pull(esms_cas)
+
+for(i in seq(length(new_df_to_bind$esms_cas))){
+  
+  # init 
+  if(i==1){
+    if(is.na(new_df_to_bind$esms_cas[i])){
+      new_df_to_bind$esms_cas[i] = last_dc
+    }
+  }
+  
+  # suite
+  if(i>1){
+    if(is.na(new_df_to_bind$esms_cas[i])){
+      new_df_to_bind$esms_cas[i] = new_df_to_bind$esms_cas[i-1]
+    }
+  }
+  
+}
+
+# # changement de noms pour rbind 
+#   # cas_confirmes cas_ehpad cas_confirmes_ehpad cas_possibles_ehpad deces deces_ehpad
+# pattern <- paste0(c("conf", "esms_cas", "esms_dc"), collapse = "|")
+# pos_names <- grepl(pattern, names(new_df_to_bind))
+# names(new_df_to_bind)[pos_names] <- c("cas_confirmes", "cas_confirmes_ehpad", "deces_ehpad")
+
+df_corrompu_to_bind <- full_df_fr %>% 
+  filter(date > "2021-02-19" & granularite %in% "pays") %>% 
+  mutate(source_type = "ministere-sante")
+
+df_corrompu_to_bind <- merge(df_corrompu_to_bind, new_df_to_bind, by = "date")
+
+# remplace les champs par les valeurs et on supprimme les colonnes 
+df_corrompu_to_bind <- df_corrompu_to_bind %>% 
+  mutate(cas_confirmes = conf,
+         deces_ehpad = esms_dc,
+         cas_confirmes_ehpad = esms_cas) %>% 
+  select(-c(conf, esms_cas, esms_dc))
+
+# l'objectif est de rajouter la donnees sur les cumuls en "doublon" avec la source type `source_type` = "ministere-sante" qui a disparu et garder
+# les lignes `source_type` = "opencovid19-fr" pour les donnees new hospi/ new rea
+
+# # tshek nombre de colonnes
+# dim(full_df_fr)
+# dim(df_corrompu_to_bind)
+
+# tst_full_df <- full_df_fr
+full_df_fr <- full_df_fr %>% 
+  bind_rows(df_corrompu_to_bind) 
+
+
+
+# fin patch insertion ---------- 
+
+
+
 # date input slider shiny ---------------
 
 # "2020-01-24" min des donnes open covid fr
@@ -224,7 +306,7 @@ global_cercle_col <- "#2ed15d "
 
 # calcul a date
 # couleurs fonds de carte sur deces
-quant_fr <- round(as.vector(quantile(df_region_a_date$deces, probs = seq(0, 1, 0.15))))-0.7
+quant_fr <- round(as.vector(quantile(df_region_a_date$deces, probs = seq(0, 1, 0.15)))) # -0.7 patch 08/04/2021
 bins_fr = c(0, quant_fr, Inf)
 cv_pal_fr <- colorBin("BuPu", 
                       domain = df_region_a_date$deces, 
@@ -427,7 +509,10 @@ names(dep_cols) = cls_names
 ui <- function(){
   
   bootstrapPage(
-    tags$head(includeHTML(("gtag.html"))),
+    tags$head(
+      includeHTML("gtag.html"),
+      tags$meta(name="google-site-verification", content="AcfOUs9Z8hdrJ43VSKVrKz5RqrnQ19ri5XCFfSxvL6M")
+      ),
     navbarPage(theme = shinytheme("flatly"), collapsible = TRUE,
                "COVID-19", id="nav",
                header = tagList(
