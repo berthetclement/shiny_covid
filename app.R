@@ -298,6 +298,25 @@ df_region_a_date <- df_region %>% filter(date %in% as.Date(date_in_fra[2]) )
 # ordonner les deux fichiers, meme ordre code region 
 df_region_a_date <- df_region_a_date[match(reg_geojson@data[["code"]], df_region_a_date$code), ]
 
+# [patch 2021-08] ----
+# data opencovid (france) non misents a jour depuis le 12/08/2021
+
+data_up_to_date_fr <- max(df_france$date)
+
+# on garde que les donnees sans NA sur `df_region_a_date`
+df_region_a_date <- df_region %>% filter(date %in% as.Date(data_up_to_date_fr) )
+
+# ordonner les deux fichiers, meme ordre code region 
+df_region_a_date <- df_region_a_date[match(reg_geojson@data[["code"]], df_region_a_date$code), ]
+
+
+# correction du selecteur de date sur le max des donnees valides 
+date_in_fra <- c("2020-01-24", data_up_to_date_fr) 
+
+# FIN [patch 2021-08] ----
+
+
+
 # base map france --------------------------------------
 
 # couleurs des cercles

@@ -31,8 +31,11 @@ On peut trouver quelques écarts selon les sources. Un lien utile permet de comp
 
 ## PATCHS CORRECTIFS
 
-1. Depuis le **19/02/2021**, les données concernant la France via [opencovid19-fr](https://github.com/opencovid19-fr/data) ne sont plus mises à jour sur certains indicateurs [github issue](https://github.com/covid19datahub/COVID19/issues/157).   
+1. Depuis le **19/02/2021**, les données concernant la France via [opencovid19-fr](https://github.com/opencovid19-fr/data) ne sont plus mises à jour sur certains indicateurs, [github issue](https://github.com/covid19datahub/COVID19/issues/157).   
     + La solution est apportée avec un changement de source de données depuis [data.gouv.fr](https://www.data.gouv.fr/fr/datasets/synthese-des-indicateurs-de-suivi-de-lepidemie-covid-19/#_)
+
+2. Depuis le **12/08/2021**, les données concernant la France via [opencovid19-fr](https://github.com/opencovid19-fr/data) ne sont plus mises à jour sur l'ensemble des indicateurs, [github issue](https://github.com/opencovid19-fr/data/issues/578). 
+    + En attendant que les données soient mises à jour, l'application n'affichera que les données disponibles.
 
 
 ## L'application

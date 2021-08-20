@@ -14,7 +14,7 @@ mapUI <- function(id, dates_param){
                   span(
                     tags$i(
                       h6(
-                        "Les données proviennent du Centre des sciences et de l'ingénierie des systèmes de l'Université Johns Hopkins (JHU CSSE) ."
+                        "Les donn\u00e9es proviennent du Centre des sciences et de l'ing\u00e9nierie des syst\u00e8mes de l'Universit\u00e9 Johns Hopkins (JHU CSSE) ."
                         , 
                         style="color:#045a8d")
                       )),
@@ -29,7 +29,7 @@ mapUI <- function(id, dates_param){
                   plotOutput(ns("cumulative_plot"), height="130px", width="100%"),
 
                   sliderInput(ns("plot_date"),
-                              label = h5("Sélection de la date"),
+                              label = h5("S\u00e9lection de la date"),
                               min = as.Date(dates_param[1],"%Y-%m-%d"),
                               max = as.Date(dates_param[2]),
                               value = as.Date(dates_param[2]),
@@ -147,7 +147,7 @@ mapServer  <- function(id, data_sf, map_json, obj_map_base, obj_plot_map, func_p
           select(jhu_ID) %>% 
           dim()
         
-        paste0(prettyNum(nb_country[1], big.mark=","), " pays comptabilisés")
+        paste0(prettyNum(nb_country[1], big.mark=","), " pays comptabilis\u00e9s")
       })
       
     }
